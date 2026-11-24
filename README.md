@@ -1,390 +1,360 @@
-# Kaos Teorisi, Kelebek Etkisi, Fraktallar ve Noise — Atmosfer Bilimleri ve ML Perspektifi
+# Chaos Theory, the Butterfly Effect, Fractals and Noise — An Atmospheric Science and Machine Learning Perspective
 
-**Cansu Yamanlar** · İTÜ MTO 311E Data Analysis · Kasım 2026
+**Cansu Yamanlar** · İTÜ MTO 311E Data Analysis · November 2026
 
-## 1. Giriş: Hocanın notları ne söylüyor?
+**▶ Interactive dashboard:** [Lorenz's desk, MIT, 1961](https://cyamanlar.github.io/chaos-theory/) — play Edward Lorenz, type in two nearby initial values and watch the two weathers split (`index.html`).
 
-Hocanın tek cümlelik mesajı şu: **atmosfer gibi doğrusal olmayan (nonlinear) sistemlerde küçük bir hata ya da gürültü (noise), iteratif adımlarda büyür; bu yüzden hem veriden gürültüyü ayıklamalı hem de tek bir tahmine değil, olasılıklara bakmalıyız.**
+## 1. Introduction: what the lecture notes say
 
-Notlardaki maddelerin açık hâli:
+The core message of the lecture is this: **in nonlinear systems such as the atmosphere, a small error or noise grows over iterative steps; therefore we must both remove noise from the data and think in terms of probabilities rather than a single forecast.**
 
-| Nottaki ifade                                                                                        | Ne demek                                                                                                            | Bu raporda |
-|------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|------------|
-| "Modelin patlaması, noise'ın artması, model kaldıramaz; iteratif adımlarda"                          | Model her adımda bir önceki çıktısını girdi olarak kullanır; hata her adımda çarpılarak büyür (noise amplification) | Bölüm 3, 4 |
-| "Noise / noise reduction → Harmonik analizde"                                                        | Gürültü frekans uzayında ayıklanabilir (Fourier/harmonik analiz, smoothing)                                         | Bölüm 4    |
-| "Sensitive dependence on initial conditions (Chaos theory)"                                          | Başlangıç koşulundaki minicik fark zamanla dev bir farka dönüşür                                                    | Bölüm 2, 3 |
-| "Fractal geometry → zaman serisi, borsa hareketi, hava"                                              | Doğadaki düzensiz şekillerin ve serilerin her ölçekte benzer görünmesi                                              | Bölüm 5    |
-| "Kaos teorisi: film, Edward Lorenz"                                                                  | Kaos teorisinin babası Lorenz ve onu anlatan belgesel                                                               | Bölüm 2    |
-| "Noise önemli sinyallerde daima vardır… elektromanyetik… frekans ortamında gürültüler ayıklanabilir" | Her ölçümde gürültü vardır; sinyal ile gürültü farklı frekanslarda yaşadığı için ayrılabilir                        | Bölüm 4    |
+The points in the lecture notes, unpacked:
 
-Akış: önce kaosun ne olduğunu, sonra neden başlangıç koşullarına bağlı olduğunu matematikle gösteriyoruz. Ardından noise, fraktallar, atmosfer/sürdürülebilirlik uygulamaları ve makine öğrenmesi (ML) bağlantısı geliyor.
+| Note | Meaning | Section |
+| --- | --- | --- |
+| "The model blows up, noise grows, the model cannot handle it; over iterative steps" | A model uses its previous output as the next input; the error is multiplied at every step (noise amplification) | 3, 4 |
+| "Noise / noise reduction → in harmonic analysis" | Noise can be separated in the frequency domain (Fourier/harmonic analysis, smoothing) | 4 |
+| "Sensitive dependence on initial conditions (chaos theory)" | A tiny difference in the initial condition becomes a huge difference over time | 2, 3 |
+| "Fractal geometry → time series, stock market movement, weather" | Irregular shapes and series in nature look similar at every scale | 5 |
+| "Chaos theory: the film, Edward Lorenz" | Lorenz, the father of chaos theory, and the documentary about him | 2 |
+| "Noise is always present in important signals… electromagnetic… noise can be filtered in the frequency domain" | Every measurement contains noise; signal and noise live at different frequencies, so they can be separated | 4 |
 
-## 2. Kaos nedir? Lorenz'in hikayesi
+Outline: first we define chaos, then show mathematically why it depends on initial conditions. Then we cover noise, fractals, applications in atmospheric science and sustainability, and the link to machine learning (ML).
 
-**Kaos = deterministik ama öngörülemez davranış.** Sistemi yöneten denklemler tam olarak bellidir, içinde zar atma (rastgelelik) yoktur. Yine de uzun vadeli geleceği pratikte hesaplanamaz.
+## 2. What is chaos? The Lorenz story
 
-### Hikaye: 0.506127 yerine 0.506
+**Chaos = deterministic but unpredictable behaviour.** The equations governing the system are fully known and contain no randomness. Yet its long-term future cannot be computed in practice.
 
-1961'de MIT'de meteorolog Edward Lorenz, 12 değişkenli basit bir hava modeli çalıştırıyordu. Bir simülasyonu tekrar görmek için yarıdan başlattı ve ara değeri çıktıdan elle girdi. Bilgisayar 0.506127 tutarken çıktıda 0.506 yazıyordu. Aradaki fark binde birden küçüktü, yani bir ölçüm hatası kadar.
+### The story: 0.506 instead of 0.506127
 
-Kahve içip döndüğünde iki simülasyonun birkaç "ay" sonra tamamen farklı hava ürettiğini gördü. Bilgisayar bozuk değildi: **sistem, başlangıçtaki minicik farka aşırı duyarlıydı.** Bu, hocanın notundaki *sensitive dependence on initial conditions* kavramıdır.
+In 1961 at MIT, meteorologist Edward Lorenz was running a simple 12-variable weather model. To look at a simulation again, he restarted it halfway and typed in an intermediate value by hand from the printout. The computer stored 0.506127, but the printout showed 0.506. The difference was smaller than one part in a thousand, about the size of a measurement error.
 
-### Lorenz (1963) denklemleri
+When he came back from a coffee break, the two simulations had produced completely different weather after a few "months". The computer was not broken: **the system was extremely sensitive to the tiny initial difference.** This is the concept of *sensitive dependence on initial conditions* in the lecture notes.
 
-Lorenz daha sonra modeli, alttan ısıtılan bir sıvı tabakasındaki konveksiyonu (Rayleigh–Bénard konveksiyonu) tarif eden 3 denkleme indirdi:
+### The Lorenz (1963) equations
+
+Lorenz later reduced the model to three equations describing convection in a fluid layer heated from below (Rayleigh–Bénard convection):
 
 $$
 \frac{dx}{dt} = \sigma (y - x), \qquad \frac{dy}{dt} = x(\rho - z) - y, \qquad \frac{dz}{dt} = xy - \beta z
 $$
 
-Klasik değerler σ = 10, ρ = 28, β = 8/3 şeklindedir. Değişkenlerin ve parametrelerin fiziksel anlamı:
+The classic values are σ = 10, ρ = 28, β = 8/3. Physical meaning of the variables and parameters:
 
-| Sembol              | Fiziksel anlamı                                                  |
-|---------------------|------------------------------------------------------------------|
-| x                   | Konvektif dolaşımın şiddeti (hava hücresinin dönme hızı ve yönü) |
-| y                   | Yükselen ve alçalan kollar arasındaki yatay sıcaklık farkı       |
-| z                   | Dikey sıcaklık profilinin doğrusal profilden sapması             |
-| σ (Prandtl sayısı)  | Viskozitenin ısı iletimine oranı                                 |
-| ρ (Rayleigh sayısı) | Alttan ısıtmanın şiddeti; ρ ≈ 24.74'ün üstünde kaos başlar       |
-| β                   | Konveksiyon hücresinin geometrisi (en/boy oranı)                 |
+| Symbol | Physical meaning |
+| --- | --- |
+| x | Intensity of the convective circulation (rotation speed and direction of the cell) |
+| y | Horizontal temperature difference between the rising and sinking branches |
+| z | Deviation of the vertical temperature profile from a linear profile |
+| σ (Prandtl number) | Ratio of viscosity to thermal diffusivity |
+| ρ (Rayleigh number) | Strength of heating from below; chaos begins above ρ ≈ 24.74 |
+| β | Geometry of the convection cell (aspect ratio) |
 
-Kritik nokta **xz ve xy terimleridir: bunlar doğrusal olmayan (nonlinear) terimlerdir.** Doğrusal bir sistemde girdideki hata çıktıya orantılı olarak geçer. Doğrusal olmayan sistemde ise hata kendi kendini çarpar ve üstel olarak büyür.
+The key point is that **the xz and xy terms are nonlinear.** In a linear system, an input error passes to the output proportionally. In a nonlinear system, the error multiplies itself and grows exponentially.
 
-### Kelebek etkisi ve garip çeker (strange attractor)
+### The butterfly effect and the strange attractor
 
-Çözüm uzayda çizildiğinde kelebek kanatlarına benzeyen bir şekil çıkar: **Lorenz çekeri (Lorenz attractor).** Yörünge iki kanat arasında düzensizce gidip gelir, kendini asla tekrarlamaz ama kanatların dışına da çıkmaz.
+Plotted in phase space, the solution forms a shape resembling butterfly wings: **the Lorenz attractor.** The trajectory switches irregularly between the two wings, never repeats itself, yet never leaves the wings.
 
-- **Hava (weather)** = yörüngenin şu an hangi kanatta olduğu. Bu, uzun vadede öngörülemez.
+- **Weather** = which wing the trajectory is on right now. This is unpredictable in the long run.
+- **Climate** = the shape of the wings, i.e. the statistics. This is predictable.
 
-- **İklim (climate)** = kanatların şekli, yani istatistik. Bu ise öngörülebilir.
+Lorenz titled his 1972 talk "Does the flap of a butterfly's wings in Brazil set off a tornado in Texas?". This is why the concept is known as the **butterfly effect**. A butterfly does not literally create a tornado. The idea is that a small-scale difference we cannot observe can grow enough to completely change our forecast.
 
-Lorenz 1972'deki konuşmasına "Brezilya'da bir kelebeğin kanat çırpması Teksas'ta bir kasırga başlatır mı?" başlığını verdi. Bu yüzden kavram **kelebek etkisi (butterfly effect)** adıyla bilinir. Kelebek gerçekten kasırga yaratmaz. Fikir şu: gözlemleyemediğimiz küçük ölçekli bir fark, zamanla tahminimizi tamamen değiştirecek kadar büyüyebilir.
+### The film mentioned in the lecture
 
-### Hocanın bahsettiği film
+The notes do not name the film. Two well-known documentaries cover Lorenz and these topics:
 
-Notta filmin adı yazılmamış. Lorenz'i anlatan iki bilinen belgesel var, ikisi de bu konuları kapsıyor:
+- **BBC – *The Secret Life of Chaos* (2010, presented by Jim Al-Khalili).** Covers Turing's pattern formation, Lorenz's weather model, Mandelbrot's fractals and the emergence of order from disorder. This best matches the chaos + fractals pairing in the notes.
+- ***Chaos: A Mathematical Adventure* (2013, Ghys, Leys and Alvarez).** A nine-chapter animation that explains the Lorenz attractor and the butterfly effect very visually.
 
-- **BBC – *The Secret Life of Chaos* (2010, sunucu Jim Al-Khalili).** Turing'in desen oluşumu, Lorenz'in hava modeli, Mandelbrot'un fraktalları ve düzensizlikten düzenin doğuşu anlatılır. Hocanın notundaki kaos + fraktal ikilisine en çok uyan bu.
+It is worth confirming in class which one was meant.
 
-- ***Chaos: A Mathematical Adventure* (2013, Ghys, Leys ve Alvarez).** 9 bölümlük bir animasyon. Lorenz çekerini ve kelebek etkisini görsel olarak çok iyi anlatır.
+## 3. Why does it depend on initial conditions? Mathematics and physics
 
-Hocanın hangisini kastettiğini derste teyit etmekte fayda var.
+**Answer: in nonlinear systems, the distance between two nearby starting points is multiplied by a factor at every step. The error therefore grows exponentially rather than additively.**
 
-## 3. Neden başlangıç koşullarına bağlı? Matematik ve fizik
+### Step 1 — The simplest chaotic system: the logistic map
 
-**Cevap: doğrusal olmayan sistemlerde iki yakın başlangıç noktası arasındaki mesafe her adımda bir katsayıyla çarpılır. Bu yüzden hata toplanarak değil, üstel olarak büyür.**
-
-### Adım 1 — En basit kaotik sistem: lojistik harita
-
-Hocanın "iteratif adımlar" dediği şey tam olarak budur. Bir sonraki değer bir öncekinden hesaplanır:
+This is exactly what the lecture calls "iterative steps". Each value is computed from the previous one:
 
 $$
 x_{n+1} = r \, x_n \, (1 - x_n), \qquad r = 4
 $$
 
-Aynı denklemi iki kez çalıştıralım: biri x₀ = 0.3, diğeri x₀ = 0.3001 ile başlasın. Fark yalnızca 0.0001, yani bir termömetrenin yuvarlama hatası kadar. Aşağıdaki grafikte 10. adımda farkın 0.034'e, 20. adımda 0.94'e çıktığı görülüyor. Bu noktada iki seri artık tamamen ilgisizdir; değerler zaten 0 ile 1 arasında olduğundan hata "doymuş" olur.
+Let us run the same equation twice, starting from x₀ = 0.3 and x₀ = 0.3001. The difference is only 0.0001, the size of a thermometer's rounding error. The figure below shows that the difference reaches 0.034 at step 10 and 0.94 at step 20. At that point the two series are completely unrelated; since the values lie between 0 and 1, the error has "saturated".
 
-![Lojistik harita hata büyümesi](figures/logistic_error_growth.png)
+![Logistic map error growth](figures/logistic_error_growth.png)
 
-Python ile hesaplandı · lojistik harita r = 4, 20 iterasyon
+Although the difference fluctuates in the first steps, on average it follows the theoretical line that doubles every step, and it saturates once it reaches the 0–1 range.
 
-Fark, ilk adımlarda iniş çıkış yapsa da ortalamada her adımda iki katına çıkan teorik çizgiyi izliyor ve 0–1 aralığına ulaşınca doyuyor.
+### Step 2 — Why is it multiplied? (Mathematics)
 
-### Adım 2 — Neden çarpılıyor? (Matematik)
-
-Küçük bir hata δₙ için Taylor açılımı şunu verir: δₙ₊₁ ≈ f′(xₙ) · δₙ. Yani her adımda hata, fonksiyonun o noktadaki eğimiyle çarpılır. Bu eğimlerin ortalama logaritmasına **Lyapunov üssü (Lyapunov exponent) λ** denir:
+For a small error δₙ, a Taylor expansion gives δₙ₊₁ ≈ f′(xₙ) · δₙ. At every step, the error is multiplied by the slope of the function at that point. The average logarithm of these slopes is the **Lyapunov exponent λ**:
 
 $$
 \lambda = \lim_{N\to\infty} \frac{1}{N} \sum_{n=0}^{N-1} \ln \lvert f'(x_n) \rvert, \qquad \delta(t) \approx \delta_0 \, e^{\lambda t}
 $$
 
-- **λ \< 0:** Hata söner, sistem kararlıdır (sürtünmeli sarkaç).
+- **λ < 0:** The error decays; the system is stable (a pendulum with friction).
+- **λ = 0:** The error stays constant (periodic motion, e.g. a planetary orbit).
+- **λ > 0:** The error grows exponentially, i.e. **chaos.** For r = 4, λ = ln 2 ≈ 0.693: on average the error doubles at every step.
 
-- **λ = 0:** Hata sabit kalır (periyodik hareket, örneğin gezegen yörüngesi).
+### Step 3 — The predictability horizon
 
-- **λ \> 0:** Hata üstel büyür, yani **kaos.** r = 4 için λ = ln 2 ≈ 0.693'tir: hata ortalamada her adımda iki katına çıkar.
-
-### Adım 3 — Öngörülebilirlik ufku (predictability horizon)
-
-Hata, kabul edilebilir sınır Δ'ya ulaşınca tahmin değersiz olur. Bu süre:
+The forecast becomes worthless once the error reaches an acceptable limit Δ. This time is:
 
 $$
 T \approx \frac{1}{\lambda} \ln \frac{\Delta}{\delta_0}
 $$
 
-**Önemli sonuç:** Başlangıç hatasını (δ₀) 10 kat azaltmak, tahmin süresine yalnızca ln 10 / λ ekler. Lojistik haritada bu sadece 3.3 adım demektir. Ölçümleri ne kadar iyileştirirseniz iyileştirin, kazanç logaritmik kalır.
+**Key result:** Reducing the initial error (δ₀) tenfold adds only ln 10 / λ to the forecast horizon. For the logistic map, that is just 3.3 steps. However much you improve the measurements, the gain remains logarithmic.
 
-### Adım 4 — Atmosferdeki karşılığı (Fizik)
+### Step 4 — The atmospheric counterpart (Physics)
 
-Atmosferde doğrusal olmayan terim, Navier–Stokes denklemindeki **adveksiyon terimi (u·∇)u**'dur. Rüzgar kendi kendini taşır. Bu terim hava parsellerini **gerer ve katlar (stretching and folding)**: yakın iki parsel önce birbirinden uzaklaşır, sonra sınırlı bir alana geri katlanır. Bu yüzden hata sınırsız büyümez, ama bilgi kaybolur.
+In the atmosphere, the nonlinear term is the **advection term (u·∇)u** in the Navier–Stokes equations: the wind transports itself. This term **stretches and folds** air parcels: two nearby parcels first move apart, then fold back into a bounded region. The error therefore does not grow without bound, but information is lost.
 
-Sayılarla atmosfer:
+The atmosphere in numbers:
 
-- Sinoptik ölçekte (cepheler, alçak basınç sistemleri) hatanın iki katına çıkma süresi (error doubling time) bugünkü modellerde yaklaşık 1.5–2 gündür.
+- At the synoptic scale (fronts, low-pressure systems), the error doubling time in today's models is about 1.5–2 days.
+- At the convective scale (thunderstorms), it is of the order of hours.
+- Small-scale errors propagate to larger scales over time (upscale error growth, Lorenz 1969). This is why the practical limit of deterministic weather forecasting is about 10 days and the theoretical upper limit about 2 weeks.
 
-- Konvektif ölçekte (gök gürültülü fırtına) bu süre saatler mertebesindedir.
+**Worked example:** Suppose today's temperature analysis over Istanbul has a 0.5 °C error and the error doubles every 2 days. The error is then 1 °C on day 2, 2 °C on day 4, 4 °C on day 6 and 8 °C on day 8. An 8 °C error is no better than quoting the climatological mean: the forecast no longer carries information. This is a simplified calculation; in reality the error saturates at some level.
 
-- Küçük ölçekli hatalar zamanla büyük ölçeklere taşınır (upscale error growth, Lorenz 1969). Bu yüzden deterministik hava tahmininin pratik sınırı yaklaşık 10 gün, teorik üst sınırı ise yaklaşık 2 haftadır.
+## 4. What is noise? Are error and noise the same thing?
 
-**Somut örnek:** Bugün İstanbul üzerindeki sıcaklık analizinde 0.5 °C hata olduğunu ve hatanın 2 günde ikiye katlandığını varsayalım. Hata 2. gün 1 °C, 4. gün 2 °C, 6. gün 4 °C, 8. gün 8 °C olur. 8 °C'lik hata, iklimsel ortalamayı söylemekten farksızdır: tahmin artık bilgi taşımaz. Bu basitleştirilmiş bir hesaptır; gerçekte hata belli bir seviyede doyar.
-
-## 4. Noise nedir? Hata ile noise aynı şey mi?
-
-**Noise (gürültü), ölçtüğümüz değerin içindeki, asıl ilgilendiğimiz fiziksel sinyale ait olmayan rastgele kısımdır.** Her ölçüm şu şekilde yazılabilir:
+**Noise is the random part of a measured value that does not belong to the physical signal we are interested in.** Every measurement can be written as:
 
 $$
 x_t = s_t + b + \varepsilon_t \qquad \text{(observation = true signal + bias + random noise)}
 $$
 
-### Hata, bias ve noise ayrımı
+### Error, bias and noise
 
-| Terim                                    | Tanım                                                | Atmosfer örneği                                                 | Nasıl giderilir                                |
-|------------------------------------------|------------------------------------------------------|-----------------------------------------------------------------|------------------------------------------------|
-| Hata (error)                             | Gözlem − gerçek değer; toplam fark                   | Termömetre 21.7 °C diyor, gerçek 21.0 °C                        | Bileşenlerine ayırarak                         |
-| Bias (sistematik hata)                   | Hep aynı yönde kayma; ortalaması sıfır değil         | Güneşe maruz kalan sensör hep +0.5 °C fazla ölçer               | Kalibrasyon, homojenlik testi, bias correction |
-| Noise (rastgele hata, ε)                 | Ortalaması sıfır, öngörülemeyen dalgalanma           | Sensör çözünürlüğü, elektronik gürültü, elektromanyetik parazit | Ortalama alma, smoothing, filtreleme           |
-| Temsil hatası (representativeness error) | Nokta ölçümünün model grid kutusunu temsil edememesi | Bir istasyon, 9 km'lik model hücresinin ortalaması değildir     | Veri asimilasyonunda hata kovaryansı ile       |
+| Term | Definition | Atmospheric example | How to remove it |
+| --- | --- | --- | --- |
+| Error | Observation − true value; the total difference | Thermometer reads 21.7 °C, true value is 21.0 °C | By splitting it into its components |
+| Bias (systematic error) | Always shifted in the same direction; non-zero mean | A sun-exposed sensor always reads +0.5 °C too high | Calibration, homogeneity test, bias correction |
+| Noise (random error, ε) | Zero-mean, unpredictable fluctuation | Sensor resolution, electronic noise, electromagnetic interference | Averaging, smoothing, filtering |
+| Representativeness error | A point measurement cannot represent a model grid box | A single station is not the average of a 9 km model cell | Error covariances in data assimilation |
 
-Yani **noise, hatanın rastgele olan parçasıdır.** Bias'ı bir kere bulursanız çıkarırsınız. Noise'u ise tek bir ölçümde ayıklayamazsınız, ancak istatistikle (çok ölçüm, frekans analizi) bastırabilirsiniz.
+So **noise is the random part of the error.** Once you find the bias, you can subtract it. Noise cannot be removed from a single measurement; it can only be suppressed statistically (many measurements, frequency analysis).
 
-**Kaos noise değildir.** Kaotik bir seri rastgele *görünür* ama deterministiktir. Noise gerçekten rastgeledir. Sınavda bu ayırt edici nokta sorulabilir.
+**Chaos is not noise.** A chaotic series *looks* random but is deterministic. Noise is genuinely random. This distinction may come up in the exam.
 
-### Hocanın örneği: radyo ve elektromanyetik parazit
+### The lecture's example: radio and electromagnetic interference
 
-Radyo dinlerken şarkı sinyaldir, cızırtı ise noise'dur. Otomatik meteoroloji istasyonunda da durum aynıdır. Sensör kablosu yakındaki bir elektrik hattından veya telsizden elektromanyetik parazit alır ve verinin üzerine hızlı, düzensiz sıçramalar ekler. Hocanın "noise önemli sinyallerde daima vardır" demesinin anlamı budur: sıfır gürültülü ölçüm yoktur.
+When listening to the radio, the music is the signal and the crackle is noise. The same applies to an automatic weather station. The sensor cable picks up electromagnetic interference from a nearby power line or radio transmitter, which adds fast, irregular spikes on top of the data. This is what the lecture means by "noise is always present in important signals": there is no noise-free measurement.
 
-### "Model patlar": iteratif modelde noise neden büyür?
+### "The model blows up": why does noise grow in an iterative model?
 
-Sayısal hava tahmin modeli bir zaman adımının çıktısını bir sonrakinin girdisi yapar. Başlangıç verisindeki noise, Bölüm 3'teki gibi her adımda e^λ ile çarpılır. Bu noise'un ikinci bir zararı daha vardır: grid'in çözemeyeceği kısa dalga boylu gürültü sayısal olarak kararlı olmayan (numerically unstable) modları tetikleyebilir. Bu durumda model gerçekten "patlar" (blow-up) ve değerler sonsuza gider. Hocanın "model kaldıramaz" dediği şey budur. Bu yüzden modeller başlangıç verisini dengeler (initialization) ve sayısal difuzyon ya da filtrelerle kısa dalgaları söndürür.
+A numerical weather prediction model uses the output of one time step as the input to the next. Noise in the initial data is multiplied by e^λ at every step, as in Section 3. This noise does a second kind of damage: short-wavelength noise that the grid cannot resolve can trigger numerically unstable modes. The model then genuinely "blows up" and the values go to infinity. This is what the lecture means by "the model cannot handle it". For this reason, models balance the initial data (initialization) and damp short waves with numerical diffusion or filters.
 
-### Noise reduction: frekans uzayında ayıklama (harmonik analiz)
+### Noise reduction: filtering in the frequency domain (harmonic analysis)
 
-Hocanın son notu, "frekans ortamında gürültüler ayıklanabilir", derste gördüğünüz **Harmonic Analysis** ile doğrudan bağlantılıdır. Mantık şudur:
+The lecture's last note, "noise can be filtered in the frequency domain", connects directly to the **Harmonic Analysis** topic of the course. The logic:
 
-1.  Seriyi harmoniklerin toplamı olarak yazın: x_t = x̄ + Σ \[a_k cos(2πkt/N) + b_k sin(2πkt/N)\].
+1. Write the series as a sum of harmonics: x_t = x̄ + Σ [a_k cos(2πkt/N) + b_k sin(2πkt/N)].
+2. Compute the variance carried by each harmonic: C_k²/2, where C_k² = a_k² + b_k².
+3. **The physical signal is concentrated in a few low frequencies.** For example, in monthly temperature the 1st harmonic (the annual cycle) can explain more than 90% of the total variance.
+4. **White noise, by contrast, is spread evenly across all frequencies.** Most high-frequency harmonics are noise.
+5. Keep the first few harmonics, discard the rest, and reconstruct the series. The result is the denoised signal.
 
-2.  Her harmoniğin taşıdığı varyansı hesaplayın: C_k²/2, burada C_k² = a_k² + b_k².
+The **moving average, binomial/Gaussian smoothing and LOWESS** covered in the course do the same job in the time domain. They are low-pass filters: they keep the slowly varying signal and suppress fast-oscillating noise. Success is measured by the **signal-to-noise ratio (SNR)**: SNR = Var(signal) / Var(noise).
 
-3.  **Fiziksel sinyal birkaç düşük frekansta toplanır.** Örneğin aylık sıcaklıkta 1. harmonik (yıllık döngü) toplam varyansın %90'ından fazlasını açıklayabilir.
+## 5. Fractal geometry: weather, time series and the stock market
 
-4.  **Beyaz gürültü (white noise) ise tüm frekanslara eşit dağılır.** Yüksek frekanslı harmoniklerin çoğu noise'dur.
+**A fractal is a shape that looks similar to itself as you zoom in (self-similar) and whose dimension is not an integer.** Euclidean geometry describes smooth shapes such as lines, circles and cubes. Clouds, coastlines, lightning and mountain ranges in nature, however, are rough. Mandelbrot developed fractal geometry to describe them. The lecture note "important for how we look at events, the geometry of shapes" refers to this.
 
-5.  İlk birkaç harmoniği tutup gerisini atın ve seriyi yeniden oluşturun. Sonuç, gürültüsü azaltılmış sinyaldir.
+### How is the fractal dimension computed?
 
-Derste gördüğünüz **hareketli ortalama (moving average), binom/Gauss smoothing ve LOWESS** de aynı işi zaman uzayında yapar. Bunlar alçak geçiren filtrelerdir (low-pass filter): yavaş değişen sinyali tutar, hızlı titreşen noise'u bastırır. Başarı **sinyal/gürültü oranı (signal-to-noise ratio, SNR)** ile ölçülür: SNR = Var(sinyal) / Var(noise).
-
-## 5. Fraktal geometri: hava, zaman serisi ve borsa
-
-**Fraktal, büyüttükçe kendine benzeyen (self-similar) ve boyutu tam sayı olmayan bir şekildir.** Öklid geometrisi doğru, daire ve küp gibi pürüzsüz şekilleri anlatır. Doğadaki bulut, kıyı şeridi, şimşek ve dağ sırası ise pürüzlüdür. Mandelbrot bunları anlatmak için fraktal geometriyi kurdu. Hocanın "olaylara bakışta önemli, şekil geometrisi" notu buna işaret eder.
-
-### Fraktal boyut nasıl hesaplanır?
-
-Bir şekli ε boyutlu kutularla örttüğümüzü ve N(ε) kutu gerektiğini düşünelim. Kutu sayma boyutu (box-counting dimension) şöyle tanımlanır:
+Suppose we cover a shape with boxes of size ε and need N(ε) boxes. The box-counting dimension is defined as:
 
 $$
 D = \lim_{\varepsilon \to 0} \frac{\log N(\varepsilon)}{\log (1/\varepsilon)}
 $$
 
-- **Doğru:** D = 1. **Düzlem:** D = 2.
+- **Line:** D = 1. **Plane:** D = 2.
+- **Koch curve:** At each step a segment is divided into 3 and replaced by 4 segments, so D = log 4 / log 3 ≈ 1.26. More than a line, less than a plane.
+- **Coastline paradox:** Mandelbrot (1967) showed that the measured length of the coast of Britain keeps increasing as the ruler gets shorter. For the west coast, D ≈ 1.25.
+- **Lorenz attractor:** D ≈ 2.06. The butterfly shape in Section 2 is itself a fractal. Chaos and fractals are therefore two sides of the same coin: chaos describes the dynamics, and the fractal describes the geometry of those dynamics.
 
-- **Koch eğrisi:** Her adımda bir parça 3'e bölünür ve yerine 4 parça konur, bu yüzden D = log 4 / log 3 ≈ 1.26. Çizgiden fazla, düzlemden azdır.
+### Fractals in the atmosphere
 
-- **Kıyı paradoksu:** Mandelbrot (1967), Britanya kıyısının uzunluğunun cetvel kısaldıkça sürekli arttığını gösterdi. Batı kıyısı için D ≈ 1.25 bulundu.
+- **Clouds:** Lovejoy (1982) showed in satellite and radar images that the perimeter–area relation of cloud and rain areas follows the same fractal dimension (D ≈ 1.35) from a few kilometres to thousands of kilometres. You cannot tell the scale of a cloud by looking at a photograph of it.
+- **Turbulence:** Richardson's famous 1922 rhyme reads: "Big whirls have little whirls that feed on their velocity, and little whirls have lesser whirls and so on to viscosity." Large eddies pass energy down to smaller ones (the energy cascade). Kolmogorov (1941) showed that the energy spectrum follows E(k) ∝ k^(−5/3). This is a scale-invariant, i.e. fractal, structure.
+- **Precipitation and lightning:** Rain areas and lightning channels also show fractal and multifractal behaviour.
 
-- **Lorenz çekeri:** D ≈ 2.06. Bölüm 2'deki kelebek şeklinin kendisi bir fraktaldır. Bu yüzden kaos ve fraktal aynı madalyonun iki yüzüdür: kaos dinamiği, fraktal ise o dinamiğin geometrisini anlatır.
+### Fractals in time series: the Hurst exponent
 
-### Atmosferdeki fraktallar
+A time series can also be fractal: plot a temperature or river-discharge series over a 10-year or a 100-year window and you see similar irregularity. This is measured by the **Hurst exponent H**:
 
-- **Bulutlar:** Lovejoy (1982) uydu ve radar görüntülerinde bulut ve yağış alanlarının çevre–alan ilişkisinin, birkaç kilometreden binlerce kilometreye kadar aynı fraktal boyutla (D ≈ 1.35) tarif edildiğini gösterdi. Yani bir bulut fotoğrafına bakarak ölçeği tahmin edemezsiniz.
+- **H = 0.5:** Random walk, no memory.
+- **H > 0.5:** Persistence. A dry year tends to be followed by another dry year, i.e. long-range dependence.
+- **H < 0.5:** Anti-persistence (a tendency to reverse).
+- The fractal dimension of the series' graph is D = 2 − H.
 
-- **Türbülans:** Richardson'ın 1922 tarihli ünlü dizesi şöyledir: "Big whirls have little whirls that feed on their velocity, and little whirls have lesser whirls and so on to viscosity." Büyük girdaplar enerjiyi küçüklere aktarır (enerji kaskadı). Kolmogorov (1941) bunun enerji spektrumunun E(k) ∝ k^(−5/3) olduğunu gösterdi. Bu, ölçekten bağımsız yani fraktal bir yapıdır.
+Hurst found H ≈ 0.7 in the annual flood records of the Nile while working on dam design. **This is a crucial warning for trend analysis:** in a persistent series, tests such as Mann–Kendall can flag a trend as significant when there is none. This is why the course topics of autocorrelation and homogeneity matter.
 
-- **Yağış ve şimşek:** Yağış alanları ve şimşek kanalları da fraktal ve çoklu-fraktal (multifractal) davranış gösterir.
+### The link to the stock market
 
-### Zaman serisinde fraktal: Hurst üssü
+In 1963 Mandelbrot studied cotton prices. He found that price changes did not follow a normal distribution: large crashes were far more frequent than expected (fat tails), and the chart looked similar at daily, monthly and yearly scales.
 
-Zaman serisi de fraktal olabilir: bir sıcaklık ya da nehir debisi serisini 10 yıllık veya 100 yıllık pencerede çizdiğinizde benzer düzensizlik görürsünüz. Bunu **Hurst üssü H** ölçer:
+| | Atmosphere | Stock market |
+| --- | --- | --- |
+| In common | Multi-scale, fat-tailed (extreme events), volatility clustering | Same features |
+| Governing law | Physics (Navier–Stokes, thermodynamics); deterministic chaos | No physical law; human behaviour |
+| Effect of the forecast | A forecast does not change the weather | A forecast changes the price (reflexivity) |
+| Predictability | ~10 days for weather; climate statistically | Mostly close to a random walk |
 
-- **H = 0.5:** Rastgele yürüyüş, hafıza yok.
+So the lecture uses the stock market as an example in the sense that "the same mathematical language is used". It has not been shown that markets contain low-dimensional deterministic chaos as the atmosphere does.
 
-- **H \> 0.5:** Kalıcılık (persistence). Kurak yılı yine kurak yıl izleme eğilimindedir, yani uzun süreli hafıza (long-range dependence) vardır.
+## 6. Where is this used in atmospheric science and sustainability?
 
-- **H \< 0.5:** Ters dönme eğilimi (anti-persistence).
+**The biggest practical consequence of chaos theory is this: modern meteorology and climate science do not issue a single forecast; they issue a probability distribution.**
 
-- Serinin grafiğinin fraktal boyutu D = 2 − H'dir.
+### 6.1 Ensemble forecasting
 
-Hurst, H ≈ 0.7 değerini Nil nehrinin yıllık taşkın kayıtlarında baraj tasarımı çalışırken buldu. **Bu, trend analizi için kritik bir uyarıdır:** kalıcılığı olan bir seride Mann–Kendall gibi testler, gerçekte olmayan bir trendi anlamlı bulabilir. Derste gördüğünüz otokorelasyon ve homojenlik konuları bu yüzden önemlidir.
+Since we cannot know the initial condition exactly, we run the same model many times from slightly different initial conditions. ECMWF's ensemble system (ENS) runs with 1 control and 50 perturbed members.
 
-### Borsa ile ilgisi
+- If the members stay close together (low spread), the forecast can be trusted.
+- If the members diverge (high spread), the atmosphere is in a "chaotic" regime that day and uncertainty is high.
+- "70% chance of rain tomorrow" means that about 36 of the 51 members produce rain.
+- The lecture note "the initial conditions are changed" describes these perturbations.
 
-Mandelbrot 1963'te pamuk fiyatlarını inceledi. Fiyat değişimlerinin normal dağılıma uymadığını gördü: büyük çöküşler beklenenden çok daha sıktı (kalın kuyruklar, fat tails) ve grafik günlük, aylık ve yıllık ölçekte benzer görünüyordu.
+### 6.2 Data assimilation
 
-|                  | Atmosfer                                                          | Borsa                                   |
-|------------------|-------------------------------------------------------------------|-----------------------------------------|
-| Ortak yön        | Çok ölçekli, kalın kuyruklu (aşırı olaylar), oynaklık kümelenmesi | Aynı özellikler                         |
-| Yöneten yasa     | Fizik (Navier–Stokes, termodinamik); deterministik kaos           | Fizik yasası yok; insan davranışı       |
-| Tahminin etkisi  | Tahmin havayı değiştirmez                                         | Tahmin fiyatı değiştirir (refleksivite) |
-| Öngörülebilirlik | ~10 gün hava, istatistiksel olarak iklim                          | Çoğunlukla rastgele yürüyüşe yakın      |
+The model's initial state is obtained by optimally combining noisy observations with the previous forecast (the background). The Kalman filter and 4D-Var are the best-known methods. Each source of information is weighted by the inverse of its noise variance: trust noisy observations less and reliable ones more. The definition of noise in Section 4 becomes a direct mathematical tool here.
 
-Yani hoca borsayı "aynı matematiksel dil kullanılır" anlamında örnek veriyor. Borsada atmosferdeki gibi düşük boyutlu deterministik kaos olduğu ise kanıtlanmamıştır.
+### 6.3 Weather vs. climate: Lorenz's two kinds of predictability
 
-## 6. Atmosfer bilimleri ve sürdürülebilirlikte nerede kullanılıyor?
+| | Weather forecast | Climate projection |
+| --- | --- | --- |
+| Problem type | Initial-value problem (1st kind) | Boundary-value problem (2nd kind) |
+| What it predicts | Will it rain in Istanbul tomorrow? | How many hot days will Istanbul have in 2050? |
+| Determined by | Today's state of the atmosphere | External forcings such as CO₂ |
+| Role of chaos | Information is lost after ~10 days | We predict the statistics, not the value for a single year |
 
-**Kaos teorisinin pratikteki en büyük sonucu şudur: modern meteoroloji ve iklim bilimi tek bir tahmin vermez, olasılık dağılımı verir.**
+This answers the question "if we cannot forecast the weather beyond 10 days, how can we know the climate?". In climate change, the shape of the attractor changes, and we predict that shape.
 
-### 6.1 Ensemble (topluluk) tahmini
+### 6.4 Noise in climate = internal variability
 
-Madem başlangıç koşulunu tam bilemiyoruz, aynı modeli biraz farklı başlangıç koşullarıyla çok kez çalıştırırız. ECMWF'nin ensemble sistemi (ENS) 1 kontrol ve 50 bozulmuş (perturbed) üye ile çalışır.
+In climate projections, the **signal** is human-induced warming. The **noise** is chaotic natural fluctuation such as ENSO and the NAO. To separate them, the same climate model is run dozens of times, changing only the initial condition (initial-condition large ensembles). Examples are the CESM Large Ensemble (40 members) and the MPI Grand Ensemble (100 members).
 
-- Üyeler birbirine yakınsa (düşük spread) tahmine güvenilir.
+- **The ensemble mean** gives the forced signal.
+- **The spread across members** gives the natural variability.
+- **Time of emergence:** the year when the signal exceeds the noise (SNR > 1 or 2). For temperature, it emerges early in the tropics and later in the mid-latitudes. Precipitation is noisier, so it emerges much later.
 
-- Üyeler dağılıyorsa (yüksek spread) atmosfer o gün "kaotik" bir bölgededir ve belirsizlik yüksektir.
+### 6.5 What to know for sustainability and climate risk
 
-- "Yarın %70 yağış olasılığı" ifadesi, 51 üyeden yaklaşık 36'sının yağış verdiği anlamına gelir.
+1. **Never make decisions from a single model run.** Computing a city's flood risk from a single climate model simulation ignores the butterfly effect. Use ensembles and probabilities.
+2. **Extreme events are fat-tailed.** Assuming a normal distribution underestimates the 100-year flood. Return-period analysis needs an appropriate distribution (e.g. GEV).
+3. **Persistence (Hurst) amplifies drought risk.** Dry years cluster; water-resource and agricultural planning must account for this.
+4. **Renewable energy forecasts are probabilistic.** Uncertainty in wind and solar power forecasts grows with lead time. Grid operators use ensemble forecasts for reserve capacity planning.
+5. **Seasonal forecasting is possible despite chaos.** Thanks to slowly varying boundary conditions such as ocean temperature and ENSO, the "probability of a warmer-than-normal season" 1–3 months ahead can be forecast. Agriculture and early-warning systems rely on this.
 
-- Hocanın "başlangıç koşulları değiştirilir" notu, bu bozulmaları (perturbations) anlatır.
+## 7. Why it matters for machine learning
 
-### 6.2 Veri asimilasyonu (data assimilation)
+**ML models are also subject to the rules of chaos and noise. An AI weather model cannot remove the butterfly effect; it can only deal with it more intelligently.**
 
-Modelin başlangıç durumu, gürültülü gözlemler ile önceki tahminin (background) en iyi şekilde birleştirilmesiyle elde edilir. Kalman filtresi ve 4D-Var bu yöntemlerin en bilinenleridir. Her bilgi kaynağı kendi noise varyansının tersiyle ağırlıklandırılır: gürültülü gözleme az, güvenilir gözleme çok güvenilir. Bölüm 4'teki noise tanımı burada doğrudan matematiksel bir araç olur.
+### 7.1 Noise in ML: what a model must not memorize
 
-### 6.3 Hava vs. iklim: Lorenz'in iki tür öngörülebilirliği
-
-|                  | Hava tahmini                      | İklim projeksiyonu                                  |
-|------------------|-----------------------------------|-----------------------------------------------------|
-| Problem türü     | Başlangıç değer problemi (1. tür) | Sınır değer problemi (2. tür)                       |
-| Neyi tahmin eder | Yarın İstanbul'da yağmur var mı?  | 2050'de İstanbul'da sıcak gün sayısı ne olacak?     |
-| Belirleyen       | Bugünkü atmosfer durumu           | CO₂ gibi dış zorlamalar (forcing)                   |
-| Kaosun rolü      | ~10 günden sonra bilgi biter      | Tek yılın değerini değil, istatistiği tahmin ederiz |
-
-"Hava 10 gün sonrasını bilemiyorsa iklimi nasıl biliyoruz?" sorusunun cevabı budur. İklimde çeker şekli değişir, biz de o şekli tahmin ederiz.
-
-### 6.4 İklimde noise = iç değişkenlik (internal variability)
-
-İklim projeksiyonlarında **sinyal**, insan kaynaklı ısınmadır. **Noise** ise ENSO ve NAO gibi kaotik doğal dalgalanmalardır. Bunları ayırmak için aynı iklim modeli onlarca kez, yalnızca başlangıç koşulu değiştirilerek çalıştırılır (initial-condition large ensembles). CESM Large Ensemble (40 üye) ve MPI Grand Ensemble (100 üye) bunun örnekleridir.
-
-- **Üyelerin ortalaması** zorlanmış sinyali verir.
-
-- **Üyeler arası dağılım** doğal değişkenliği verir.
-
-- **Ortaya çıkış zamanı (time of emergence):** Sinyalin noise'u aştığı yıldır (SNR \> 1 veya 2). Sıcaklıkta tropiklerde erken, orta enlemlerde daha geç ortaya çıkar. Yağış daha gürültülü olduğu için çok daha geç ortaya çıkar.
-
-### 6.5 Sürdürülebilirlik ve iklim riski için bilinmesi gerekenler
-
-1.  **Tek model çalıştırmasıyla karar verilmez.** Bir şehrin sel riskini tek bir iklim modeli simülasyonuyla hesaplamak, kelebek etkisini görmezden gelmektir. Ensemble ve olasılık kullanılır.
-
-2.  **Aşırı olaylar kalın kuyrukludur.** Normal dağılım varsayımı 100 yıllık taşkını hafife alır. Dönüş periyodu (return period) analizinde uygun dağılım (örneğin GEV) seçilmelidir.
-
-3.  **Kalıcılık (Hurst) kuraklık riskini büyütür.** Kurak yıllar kümelenir; su kaynakları ve tarım planlaması bunu hesaba katmalıdır.
-
-4.  **Yenilenebilir enerji tahmini olasılıksaldır.** Rüzgar ve güneş üretim tahminlerinde belirsizlik ileri zamana doğru büyür. Şebeke operatörleri ensemble tahminlerini yedek kapasite planlamasında kullanır.
-
-5.  **Mevsimsel tahmin kaosa rağmen mümkündür.** Okyanus sıcaklığı ve ENSO gibi yavaş değişen sınır koşulları sayesinde, 1–3 ay sonrası için "normalden sıcak olma olasılığı" tahmin edilebilir. Tarım ve erken uyarı sistemleri bunu kullanır.
-
-## 7. Makine öğrenmesi açısından önemi
-
-**ML modelleri de kaos ve noise kurallarına tabidir. Bir yapay zekâ hava modeli kelebek etkisini ortadan kaldıramaz; ancak onunla daha akıllıca başa çıkabilir.**
-
-### 7.1 ML'de noise: modelin ezberlememesi gereken şey
-
-ML'de veri y = f(x) + ε olarak düşünülür. Burada f öğrenilecek fiziksel ilişki, ε ise noise'dur. Beklenen hata üçe ayrılır:
+In ML, data are modelled as y = f(x) + ε, where f is the physical relationship to be learned and ε is noise. The expected error splits into three parts:
 
 $$
 E\big[(y - \hat{y})^2\big] = \text{Bias}^2 + \text{Variance} + \sigma_\varepsilon^2
 $$
 
-- **σε² (indirgenemez hata, irreducible error):** Ne kadar iyi model kurarsanız kurun, ölçüm noise'u kadar hata kalır.
+- **σε² (irreducible error):** However good the model, an error as large as the measurement noise remains.
+- **Overfitting = memorizing noise.** Training error drops to zero but the model fails on new data. This is why regularization, dropout and early stopping exist.
+- **Noise is sometimes useful:** Deliberately adding noise to the inputs during training (noise injection) makes the model robust to measurement errors.
 
-- **Aşırı öğrenme (overfitting) = noise'u ezberlemek.** Eğitim hatası sıfıra iner ama yeni veride model başarısız olur. Regularizasyon, dropout ve erken durdurma (early stopping) bu yüzden vardır.
+### 7.2 The ML version of "the model blows up": rollout
 
-- **Noise bazen faydalıdır:** Eğitim sırasında girdiye bilerek noise eklemek (noise injection), modeli ölçüm hatalarına karşı dayanıklı (robust) yapar.
+GraphCast (Google DeepMind), Pangu-Weather (Huawei), FourCastNet (NVIDIA) and ECMWF's operational AIFS forecast in 6-hour steps. For a 10-day forecast, the model feeds its own output back in as input 40 times (autoregressive rollout). This is the exact counterpart of the lecture note "noise grows over iterative steps".
 
-### 7.2 "Model patlar" sorununun ML versiyonu: rollout
+- A model trained for a single step has never seen its own erroneous output; errors accumulate and the forecast drifts away from reality.
+- **Solution:** fine-tuning with multi-step rollouts. Trained on its own outputs over several steps, the model learns to correct its own errors.
 
-GraphCast (Google DeepMind), Pangu-Weather (Huawei), FourCastNet (NVIDIA) ve ECMWF'nin operasyonel AIFS modeli 6 saatlik adımlarla tahmin yapar. 10 günlük tahmin için model kendi çıktısını 40 kez girdi olarak kullanır (autoregressive rollout). Bu, hocanın "iteratif adımlarda noise artar" notunun birebir karşılığıdır.
+### 7.3 Why does chaos blur ML forecasts?
 
-- Tek adım için eğitilen model, kendi hatalı çıktısını hiç görmemiştir; hatalar birikir ve tahmin gerçekçilikten kopar.
+If a model is trained with mean squared error (MSE), the following happens: because the long-range future is uncertain, the forecast that minimizes MSE is **the average of all possible futures.** That average is a smooth, blurry field. As a result, storms weaken and extreme events disappear, which is dangerous for climate risk.
 
-- **Çözüm:** Çok adımlı rollout ile ince ayar (fine-tuning). Model birkaç adım boyunca kendi çıktısıyla eğitilerek kendi hatasını düzeltmeyi öğrenir.
+**The solution is probabilistic ML.** GenCast (DeepMind, 2024) produces an ensemble with a diffusion model. ECMWF's AIFS ENS is trained with the CRPS (Continuous Ranked Probability Score) loss function. In other words, ML has adopted meteorology's answer to chaos: a distribution instead of a single forecast.
 
-### 7.3 Kaos neden ML tahminlerini bulanıklaştırır?
+### 7.4 The frequency domain and neural networks
 
-Model ortalama kare hata (MSE) ile eğitilirse şu olur: uzun vadede gelecek belirsiz olduğundan, MSE'yi en aza indiren tahmin **tüm olası geleceklerin ortalamasıdır.** Bu ortalama pürüzsüz ve bulanık bir alandır. Sonuç olarak fırtınalar zayıflar ve aşırı olaylar kaybolur; bu, iklim riski için tehlikelidir.
+- The **Fourier Neural Operator (FNO)** is the basis of FourCastNet. It moves the input to the frequency domain with a Fourier transform and **keeps only the first few (low-frequency) modes.** This is the same idea as keeping the first harmonics and discarding the rest in harmonic analysis.
+- **Spectral bias:** Neural networks learn low frequencies first and high-frequency detail (and noise) later. Early stopping therefore acts as a natural noise filter.
 
-**Çözüm olasılıksal ML'dir.** GenCast (DeepMind, 2024) difüzyon modeliyle bir ensemble üretir. ECMWF'nin AIFS ENS modeli CRPS (Continuous Ranked Probability Score) kayıp fonksiyonuyla eğitilir. Yani ML de meteorolojinin kaosa cevabını benimsedi: tek tahmin yerine dağılım.
+### 7.5 Best practices for ML with atmospheric data
 
-### 7.4 Frekans uzayı ve sinir ağları
+1. **Do not use a random train/test split.** Atmospheric data are autocorrelated (Hurst > 0.5). A random split lets the model "predict" today from yesterday, causing data leakage. Use blocked splits by year.
+2. **Measure skill in Lyapunov times.** Models that learn chaotic systems (e.g. Pathak et al. 2018, reservoir computing) report skill as "how many Lyapunov times (1/λ) the forecast stays accurate".
+3. **Clean the data first.** Homogeneity testing, bias correction and smoothing come before ML. A model trained on noisy data mistakes noise for physics.
+4. **Use probabilistic metrics alongside deterministic ones:** CRPS and the spread–skill ratio in addition to RMSE.
 
-- **Fourier Neural Operator (FNO)**, FourCastNet'in temelidir. Girdiyi Fourier dönüşümüyle frekans uzayına taşır ve **yalnızca ilk birkaç modu (düşük frekansı) tutar.** Bu, harmonik analizde ilk harmonikleri tutup gerisini atmakla aynı fikirdir.
-
-- **Spektral önyargı (spectral bias):** Sinir ağları önce düşük frekansları öğrenir, yüksek frekanslı ayrıntıyı (ve noise'u) sonra öğrenir. Erken durdurma bu yüzden doğal bir noise filtresi gibi çalışır.
-
-### 7.5 Atmosfer verisiyle ML yaparken best practices
-
-1.  **Rastgele train/test bölmesi yapmayın.** Atmosfer verisi otokorelasyonludur (Hurst \> 0.5). Rastgele bölme, dünkü veriyle bugünü "tahmin ettirerek" bilgi sızıntısına (data leakage) yol açar. Yıllara göre bloklu bölme kullanın.
-
-2.  **Başarıyı Lyapunov zamanı ile ölçün.** Kaotik sistem öğrenen modeller (örneğin Pathak ve ark. 2018, reservoir computing), başarıyı "kaç Lyapunov zamanı (1/λ) boyunca doğru tahmin ettiği" ile raporlar.
-
-3.  **Önce veriyi temizleyin.** Homojenlik testi, bias düzeltmesi ve smoothing ML'den önce gelir. Gürültülü veriyle eğitilen model, noise'u fizik sanar.
-
-4.  **Deterministik metriklere ek olarak olasılıksal metrikler kullanın:** RMSE'nin yanında CRPS ve spread–skill oranı.
-
-## 8. Örnek sınav sorusu ve özet
+## 8. Worked exam question and summary
 
 ### Question
 
 The logistic map xₙ₊₁ = 4xₙ(1 − xₙ) is iterated from two initial conditions, x₀ = 0.3000 and y₀ = 0.3001.
 
-\(a\) Compute x₁, x₂, x₃, y₁, y₂, y₃ and the absolute differences \|xₙ − yₙ\|. (b) The Lyapunov exponent of this map is λ = ln 2. Estimate the number of iterations after which the difference reaches 0.5. (c) Explain the result in terms of sensitive dependence on initial conditions and noise.
+(a) Compute x₁, x₂, x₃, y₁, y₂, y₃ and the absolute differences |xₙ − yₙ|.
+(b) The Lyapunov exponent of this map is λ = ln 2. Estimate the number of iterations after which the difference reaches 0.5.
+(c) Explain the result in terms of sensitive dependence on initial conditions and noise.
 
 ### Solution
 
-**(a)** x₁ = 4(0.3)(0.7) = 0.840000 ve y₁ = 4(0.3001)(0.6999) = 0.840160.
+**(a)** x₁ = 4(0.3)(0.7) = 0.840000 and y₁ = 4(0.3001)(0.6999) = 0.840160.
 
-| n   | xₙ       | yₙ       | \|xₙ − yₙ\| |
-|-----|----------|----------|-------------|
-| 0   | 0.300000 | 0.300100 | 0.000100    |
-| 1   | 0.840000 | 0.840160 | 0.000160    |
-| 2   | 0.537600 | 0.537165 | 0.000435    |
-| 3   | 0.994345 | 0.994475 | 0.000130    |
+| n | xₙ | yₙ | \|xₙ − yₙ\| |
+| --- | --- | --- | --- |
+| 0 | 0.300000 | 0.300100 | 0.000100 |
+| 1 | 0.840000 | 0.840160 | 0.000160 |
+| 2 | 0.537600 | 0.537165 | 0.000435 |
+| 3 | 0.994345 | 0.994475 | 0.000130 |
 
-Fark tek düze artmıyor; 3. adımda azalıyor, çünkü x ≈ 1 civarında eğim \|f′(x)\| = \|4 − 8x\| küçüktür. İlk adımlarda büyüme ancak ortalamada üsteldir.
+The difference does not grow monotonically; it shrinks at step 3 because the slope |f′(x)| = |4 − 8x| is small near x ≈ 1. Growth over the first steps is exponential only on average.
 
-**(b)** δ₀ = 0.0001, Δ = 0.5 ve λ = ln 2 ≈ 0.693 için:
+**(b)** With δ₀ = 0.0001, Δ = 0.5 and λ = ln 2 ≈ 0.693:
 
 $$
 T \approx \frac{1}{\lambda}\ln\frac{\Delta}{\delta_0} = \frac{\ln(0.5/0.0001)}{\ln 2} = \frac{\ln 5000}{0.693} = \frac{8.517}{0.693} \approx 12.3 \text{ iterations}
 $$
 
-Sayısal kontrol: fark 12. adımda 0.408, 13. adımda 0.488, 14. adımda 0.954 olur. Yani 0.5 eşiği 13–14. adımda aşılır ve tahmin, ortalamaya dayalı kestirimle uyumludur.
+Numerical check: the difference is 0.408 at step 12, 0.488 at step 13 and 0.954 at step 14. The 0.5 threshold is crossed at step 13–14, consistent with the average-based estimate.
 
-**(c)** 0.0001'lik bir başlangıç farkı, yani bir ölçüm noise'u, yaklaşık 13 iterasyonda 0–1 aralığının yarısı kadar bir farka dönüşür. Sistem deterministiktir ama λ \> 0 olduğu için kaotiktir. Başlangıç hatasını 10 kat azaltmak T'ye yalnızca ln 10 / ln 2 ≈ 3.3 iterasyon ekler. Bu yüzden tek tahmin yerine ensemble kullanılır.
+**(c)** An initial difference of 0.0001, i.e. a measurement noise, grows within about 13 iterations into a difference half the size of the whole 0–1 range. The system is deterministic but chaotic because λ > 0. Reducing the initial error tenfold adds only ln 10 / ln 2 ≈ 3.3 iterations to T. This is why ensembles are used instead of a single forecast.
 
-### Tek sayfalık özet
+### One-page summary
 
-| Kavram                           | Bir cümlede                                   | Atmosferdeki karşılığı                                    | ML karşılığı                             |
-|----------------------------------|-----------------------------------------------|-----------------------------------------------------------|------------------------------------------|
-| Kaos                             | Deterministik ama öngörülemez                 | Hava ~10 günden öteye tahmin edilemez                     | Rollout'ta hata birikimi                 |
-| Başlangıç koşullarına hassasiyet | λ \> 0 ise hata e^(λt) ile büyür              | Ensemble tahmini, veri asimilasyonu                       | Olasılıksal modeller (GenCast, AIFS ENS) |
-| Fraktal                          | Ölçekten bağımsız, kendine benzer yapı        | Bulutlar, türbülans, Hurst kalıcılığı                     | Bloklu train/test bölmesi                |
-| Noise                            | Hatanın rastgele, ortalaması sıfır olan kısmı | Sensör ve elektromanyetik parazit; iklimde iç değişkenlik | Overfitting, indirgenemez hata           |
-| Noise reduction                  | Sinyali düşük frekansta tut, gerisini at      | Harmonik analiz, MA, LOWESS                               | Fourier Neural Operator, erken durdurma  |
+| Concept | In one sentence | In the atmosphere | In ML |
+| --- | --- | --- | --- |
+| Chaos | Deterministic but unpredictable | Weather cannot be forecast beyond ~10 days | Error accumulation in rollout |
+| Sensitive dependence on initial conditions | If λ > 0, the error grows as e^(λt) | Ensemble forecasting, data assimilation | Probabilistic models (GenCast, AIFS ENS) |
+| Fractal | Scale-invariant, self-similar structure | Clouds, turbulence, Hurst persistence | Blocked train/test splits |
+| Noise | The random, zero-mean part of the error | Sensor and electromagnetic interference; internal variability in climate | Overfitting, irreducible error |
+| Noise reduction | Keep the signal at low frequencies, discard the rest | Harmonic analysis, MA, LOWESS | Fourier Neural Operator, early stopping |
 
-### Kod ve grafikler
+## Code and figures
 
-`chaos_noise_demo.py` bu rapordaki üç fikri sayısal olarak gösterir. Çalıştırmak için:
+`index.html` is a self-contained interactive version of the Lorenz experiment: open it in any browser, no installation needed.
+
+`chaos_noise_demo.py` demonstrates the three ideas of this report numerically. To run it:
 
 ```bash
 pip install -r requirements.txt
 python chaos_noise_demo.py
 ```
 
-| Bölüm | Ekranda çıkan sonuç | Kaydedilen grafik |
+| Part | Printed result | Saved figure |
 | --- | --- | --- |
-| Lojistik harita | Adım adım fark tablosu; λ = 0.6932 (teori ln 2); T ≈ 12.3 adım | `figures/logistic_error_growth.png` |
-| Lorenz sistemi | 1e-6 farkla başlayan iki çözüm t ≈ 25'te ayrışır | `figures/lorenz_butterfly.png` |
-| Harmonik gürültü temizleme | Yıllık harmonik varyansın %94.5'ini açıklar; SNR 16.6 → 1154 | `figures/harmonic_denoising.png` |
+| Logistic map | Step-by-step difference table; λ = 0.6932 (theory ln 2); T ≈ 12.3 steps | `figures/logistic_error_growth.png` |
+| Lorenz system | Two solutions starting 1e-6 apart diverge at t ≈ 25 | `figures/lorenz_butterfly.png` |
+| Harmonic noise reduction | The annual harmonic explains 94.5% of the variance; SNR 16.6 → 1154 | `figures/harmonic_denoising.png` |
 
-![Lorenz kelebek etkisi](figures/lorenz_butterfly.png)
+![Lorenz butterfly effect](figures/lorenz_butterfly.png)
 
-![Harmonik analizle gürültü temizleme](figures/harmonic_denoising.png)
+![Noise reduction with harmonic analysis](figures/harmonic_denoising.png)

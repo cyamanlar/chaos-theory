@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lorenz's Desk, 1961</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a curious lab notebook, playful but exact.
+   IDEA: the fan-fold printout from Lorenz's LGP-30, with two pens plotting two weathers.
+   PICTURE: a large pen plot of x(t) for the original and restarted run, splitting apart.
+   COLOUR and TYPE: green-bar paper, carbon ink, blue pen vs red pen; Literata + Plex Mono for numbers.
+   LAYOUT: controls left, big plot right; result figures above; error and attractor plots below; story last. */
+:root{color-scheme:light dark;
+ --bg:light-dark(#f4f6ef,#10140f);--paper:light-dark(#ffffff,#171c16);--bar:light-dark(#e3efdc,#1d261b);
+ --ink:light-dark(#151a14,#e6ecdf);--soft:light-dark(#5b6656,#9aa894);--line:light-dark(#cfd9c6,#2c3829);
+ --a:light-dark(#0b4f8a,#6fb2f2);--b:light-dark(#c1121f,#ff6b6b);--hot:light-dark(#b45309,#f59e0b)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Literata,Georgia,serif;overflow-x:clip}
+.band{padding:clamp(22px,3.5vw,48px) max(5vw,16px);max-width:1280px;margin:auto}
+h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;margin:0 0 8px;font-weight:600;text-wrap:balance}
+h2{font-size:22px;margin:0 0 10px;font-weight:600}
+.lede{max-width:68ch;color:var(--soft);margin:0}
+.num,input,output,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:20px;margin-top:22px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px}
+.paper{background:repeating-linear-gradient(var(--paper) 0 28px,var(--bar) 28px 56px);}
+label{display:block;font-size:14px;color:var(--soft);margin:14px 0 4px}
+label:first-of-type{margin-top:0}
+input[type=number]{width:100%;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px}
+input[type=range]{width:100%;accent-color:var(--hot);min-height:32px}
+input:focus-visible,button:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+button{font:500 14px Literata,serif;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--ink)}
+.val{float:right;color:var(--ink)}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.tile{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile b{display:block;font:500 clamp(20px,2.6vw,28px)/1.2 "IBM Plex Mono",monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile span{font-size:13px;color:var(--soft)}
+.verdict{font-size:18px;margin:0 0 12px}
+.fig{position:relative;min-height:340px}.fig>canvas{position:absolute;inset:0;width:100%;height:100%}
+.fig.sm{min-height:260px}
+.key{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--soft);margin:6px 0 0}
+.key i{display:inline-block;width:22px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.story{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.story p{margin:0;color:var(--soft)}
+.small{font-size:13px;color:var(--soft)}
+a{color:var(--a)}
+@media(max-width:900px){.grid,.two{grid-template-columns:minmax(0,1fr)}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.story{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="band" style="padding-bottom:0">
+ <h1>Lorenz's desk, MIT, 1961</h1>
+ <p class="lede">You are Edward Lorenz, meteorologist at MIT. You restart your weather model from a value typed off the printout, then go for coffee. Change the inputs and watch how far the two weathers drift apart.</p>
+</header>
+
+<main class="band" style="padding-top:0">
+ <div class="grid">
+  <section class="card paper" aria-label="Controls">
+   <label for="x0">Initial value in the computer, x₀</label>
+   <input id="x0" type="number" step="any" value="0.506127">
+   <label for="x1">Value you typed back in, x₀′</label>
+   <input id="x1" type="number" step="any" value="0.506">
+   <div class="row">
+    <button id="print" type="button">Copy from the printout (3 decimals)</button>
+    <button id="fly" type="button">Butterfly flap (+0.000001)</button>
+   </div>
+   <label for="coffee">Coffee break <span class="val mono" id="coffeeV"></span></label>
+   <input id="coffee" type="range" min="5" max="60" step="1" value="30">
+   <label for="rho">Heating knob, ρ (chaos above 24.74) <span class="val mono" id="rhoV"></span></label>
+   <input id="rho" type="range" min="10" max="40" step="0.1" value="28">
+   <label for="tol">Forecast tolerance <span class="val mono" id="tolV"></span></label>
+   <input id="tol" type="range" min="0.5" max="10" step="0.5" value="2">
+   <div class="row"><button id="reset" type="button">Back to Lorenz's 1961 values</button></div>
+   <p class="small" style="margin:14px 0 0">Model: the Lorenz (1963) equations, σ = 10, β = 8/3, started at (x₀, 1, 1), RK4 with dt = 0.005. One coffee minute runs one model time unit.</p>
+  </section>
+
+  <section aria-label="Results">
+   <div class="tiles">
+    <div class="tile"><span>Initial difference</span><b id="tD0">–</b></div>
+    <div class="tile"><span>Forecast holds until (model time)</span><b id="tT">–</b></div>
+    <div class="tile"><span>Growth rate λ, this run</span><b id="tL">–</b></div>
+    <div class="tile"><span>Error growth</span><b id="tG">–</b></div>
+   </div>
+   <p class="verdict" id="verdict"></p>
+   <div class="card">
+    <h2>x(t): two pens, two weathers</h2>
+    <div class="fig"><canvas id="cX" role="img" aria-label="x over time for both runs"></canvas></div>
+    <p class="key"><span><i style="background:var(--a)"></i>Original run (x₀)</span><span><i style="background:var(--b)"></i>Restarted run (x₀′)</span><span><i style="background:var(--hot)"></i>Forecast tolerance crossed</span></p>
+   </div>
+  </section>
+ </div>
+
+ <div class="two" style="margin-top:20px">
+  <div class="card">
+   <h2>Error between the runs (log scale)</h2>
+   <div class="fig sm"><canvas id="cE" role="img" aria-label="distance between the two runs over time"></canvas></div>
+   <p class="small">A straight rising line on a log scale means exponential growth: the slope is λ.</p>
+  </div>
+  <div class="card">
+   <h2>The butterfly: x–z attractor</h2>
+   <div class="fig sm"><canvas id="cA" role="img" aria-label="Lorenz attractor in the x-z plane"></canvas></div>
+   <p class="small">Weather is where you are on the wings; climate is the shape of the wings.</p>
+  </div>
+ </div>
+</main>
+
+<section class="band story" aria-label="What is happening">
+ <div><h2>Why it happens</h2><p>The xz and xy terms are nonlinear, so the distance between the runs is multiplied at every step: δ(t) ≈ δ₀·e^(λt). Shrinking δ₀ tenfold buys only ln 10 / λ extra time.</p></div>
+ <div><h2>Try this</h2><p>Turn the heating knob below 24.74: the errors die out and both runs settle down. Press the butterfly button: the split comes later, but it still comes.</p></div>
+ <div><h2>Why it matters</h2><p>This is why weather centres run ensembles of 50+ forecasts and why AI weather models must be probabilistic. Code and report: <a href="https://github.com/cyamanlar/chaos-theory">github.com/cyamanlar/chaos-theory</a>.</p></div>
+</section>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const S={sigma:10,beta:8/3,dt:0.005};
+const probe=document.createElement('span');probe.style.display='none';document.body.appendChild(probe);
+const css=n=>{probe.style.color='var('+n+')';return getComputedStyle(probe).color||'#888'};
+let R=null;
+
+function deriv(s,rho){return[S.sigma*(s[1]-s[0]),s[0]*(rho-s[2])-s[1],s[0]*s[1]-S.beta*s[2]]}
+function rk4(s,rho,h){
+ const k1=deriv(s,rho),a=s.map((v,i)=>v+h/2*k1[i]),k2=deriv(a,rho),b=s.map((v,i)=>v+h/2*k2[i]),
+ k3=deriv(b,rho),c=s.map((v,i)=>v+h*k3[i]),k4=deriv(c,rho);
+ return s.map((v,i)=>v+h/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]));
+}
+function run(){
+ const x0=parseFloat($('x0').value),x1=parseFloat($('x1').value);
+ const T=+$('coffee').value,rho=+$('rho').value,tol=+$('tol').value;
+ $('coffeeV').textContent=T+' min';$('rhoV').textContent=rho.toFixed(1);$('tolV').textContent=tol.toFixed(1);
+ if(!isFinite(x0)||!isFinite(x1)){$('verdict').textContent='Type two numbers to start the model.';return}
+ let a=[x0,1,1],b=[x1,1,1];const n=Math.round(T/S.dt),every=4;
+ const t=[],xa=[],xb=[],za=[],zb=[],d=[];let tc=null;
+ const d0=Math.abs(x0-x1);
+ for(let i=0;i<=n;i++){
+  const dist=Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+  if(tc===null&&dist>tol)tc=i*S.dt;
+  if(i%every===0){t.push(i*S.dt);xa.push(a[0]);xb.push(b[0]);za.push(a[2]);zb.push(b[2]);d.push(dist)}
+  a=rk4(a,rho,S.dt);b=rk4(b,rho,S.dt);
+ }
+ // Lyapunov: least-squares slope of ln d in the growth phase
+ let sx=0,sy=0,sxx=0,sxy=0,m=0;
+ for(let i=0;i<t.length;i++){
+  if(d[i]>10*d0&&d[i]<tol*0.5&&(tc===null||t[i]<tc)){const y=Math.log(d[i]);sx+=t[i];sy+=y;sxx+=t[i]*t[i];sxy+=t[i]*y;m++}
+ }
+ const lam=m>20?(m*sxy-sx*sy)/(m*sxx-sx*sx):null;
+ R={t,xa,xb,za,zb,d,tc,tol,T,rho};
+ $('tD0').textContent=d0===0?'0':d0.toExponential(2);
+ $('tT').textContent=tc===null?'> '+T:'t ≈ '+tc.toFixed(1);
+ $('tL').textContent=lam===null?'–':lam.toFixed(2);
+ const g=d0>0?d[d.length-1]/d0:0;
+ $('tG').textContent=d0===0?'–':(g>=1?'×'+(g>=1e4?g.toExponential(1):Math.round(g)):'÷'+(1/g).toFixed(0));
+ let v;
+ if(d0===0)v='Identical values: the two runs are the same weather forever. Change x₀′ a little.';
+ else if(rho<24.74&&tc===null)v='Below the chaos threshold the errors die out. Lorenz would have had a calm coffee.';
+ else if(tc===null)v='No split during this coffee break. Take a longer break and look again.';
+ else v=`A difference of ${d0.toExponential(1)} became a different weather after t ≈ ${tc.toFixed(1)}. After that, your forecast is no better than a guess.`;
+ $('verdict').textContent=v;
+ drawAll();
+}
+
+function setup(c){const r=c.getBoundingClientRect(),p=devicePixelRatio||1;c.width=r.width*p;c.height=r.height*p;const g=c.getContext('2d');g.setTransform(p,0,0,p,0,0);g.clearRect(0,0,r.width,r.height);return[g,r.width,r.height]}
+function axes(g,W,H,L,B,yt,xt,fy,fx){
+ g.font='12px "IBM Plex Mono",monospace';g.fillStyle=css('--soft');g.strokeStyle=css('--line');g.lineWidth=1;
+ yt.forEach(v=>{const y=fy(v);g.beginPath();g.moveTo(L,y);g.lineTo(W-8,y);g.stroke();g.textAlign='right';g.fillText(v.label??v,L-6,y+4)});
+ g.textAlign='center';xt.forEach(v=>g.fillText(v,fx(v),H-B+18));
+}
+function line(g,xs,ys,col,w){g.strokeStyle=col;g.lineWidth=w;g.beginPath();xs.forEach((x,i)=>i?g.lineTo(x,ys[i]):g.moveTo(x,ys[i]));g.stroke()}
+function xticks(T,W){const step=W<520?Math.ceil(T/3/5)*5:(T>30?10:5);const a=[];for(let v=0;v<=T;v+=step)a.push(v);return a}
+
+function drawX(){
+ const[g,W,H]=setup($('cX'));const L=44,B=28,top=12;const{t,xa,xb,tc,T}=R;
+ const mx=Math.max(1,...xa.map(Math.abs),...xb.map(Math.abs))*1.05;
+ const fx=v=>L+v/T*(W-L-10),fy=v=>top+(mx-v)/(2*mx)*(H-top-B);
+ const step=mx>10?10:mx>2?2:0.5,yt=[];for(let v=-Math.floor(mx/step)*step;v<=mx;v+=step)yt.push(+v.toFixed(2));
+ axes(g,W,H,L,B,yt,xticks(T,W),fy,fx);
+ if(tc!==null){g.fillStyle=css('--hot');g.globalAlpha=.12;g.fillRect(fx(tc),top,W-10-fx(tc),H-top-B);g.globalAlpha=1;
+  g.strokeStyle=css('--hot');g.setLineDash([4,4]);g.beginPath();g.moveTo(fx(tc),top);g.lineTo(fx(tc),H-B);g.stroke();g.setLineDash([]);
+  g.fillStyle=css('--hot');g.textAlign='left';g.font='13px Literata,serif';const lx=fx(tc)+6;if(lx<W-90)g.fillText('runs split',lx,top+14)}
+ line(g,t.map(fx),xa.map(fy),css('--a'),2);line(g,t.map(fx),xb.map(fy),css('--b'),1.6);
+}
+function drawE(){
+ const[g,W,H]=setup($('cE'));const L=52,B=28,top=12;const{t,d,tol,tc,T}=R;
+ const pos=d.filter(v=>v>0);if(!pos.length)return;
+ const lo=Math.floor(Math.log10(Math.min(...pos))),hi=Math.max(Math.ceil(Math.log10(Math.max(...pos,tol))),lo+1);
+ const fx=v=>L+v/T*(W-L-10),fy=v=>top+(hi-Math.log10(Math.max(v,10**lo)))/(hi-lo)*(H-top-B);
+ const yt=[];const st=Math.max(1,Math.ceil((hi-lo)/5));for(let e=lo;e<=hi;e+=st)yt.push({v:10**e,label:'1e'+e});
+ g.font='12px "IBM Plex Mono",monospace';g.fillStyle=css('--soft');g.strokeStyle=css('--line');
+ yt.forEach(o=>{const y=fy(o.v);g.beginPath();g.moveTo(L,y);g.lineTo(W-8,y);g.stroke();g.textAlign='right';g.fillText(o.label,L-6,y+4)});
+ g.textAlign='center';xticks(T,W).forEach(v=>g.fillText(v,fx(v),H-B+18));
+ g.strokeStyle=css('--hot');g.setLineDash([4,4]);g.beginPath();g.moveTo(L,fy(tol));g.lineTo(W-8,fy(tol));g.stroke();g.setLineDash([]);
+ g.fillStyle=css('--hot');g.textAlign='left';g.font='13px Literata,serif';g.fillText('tolerance',L+6,fy(tol)-6);
+ line(g,t.map(fx),d.map(fy),css('--ink'),1.8);
+ if(tc!==null){g.fillStyle=css('--hot');g.beginPath();g.arc(fx(tc),fy(tol),5,0,7);g.fill()}
+}
+function drawA(){
+ const[g,W,H]=setup($('cA'));const{xa,xb,za,zb}=R;const pad=14;
+ const xs=xa.concat(xb),zs=za.concat(zb);
+ const x0=Math.min(...xs),x1=Math.max(...xs),z0=Math.min(...zs),z1=Math.max(...zs);
+ const sc=Math.min((W-2*pad)/((x1-x0)||1),(H-2*pad)/((z1-z0)||1));
+ const ox=(W-(x1-x0)*sc)/2,oz=(H-(z1-z0)*sc)/2;
+ const fx=v=>ox+(v-x0)*sc,fz=v=>H-oz-(v-z0)*sc;
+ g.globalAlpha=.75;line(g,xa.map(fx),za.map(fz),css('--a'),1);line(g,xb.map(fx),zb.map(fz),css('--b'),1);g.globalAlpha=1;
+ g.fillStyle=css('--soft');g.font='12px Literata,serif';g.textAlign='left';g.fillText('x →',pad,H-4);g.fillText('z ↑',pad,pad+4);
+}
+function drawAll(){if(!R)return;drawX();drawE();drawA()}
+
+$('print').onclick=()=>{const v=parseFloat($('x0').value);if(isFinite(v)){$('x1').value=v.toFixed(3);run()}};
+$('fly').onclick=()=>{const v=parseFloat($('x0').value);if(isFinite(v)){$('x1').value=(v+1e-6).toFixed(7);run()}};
+$('reset').onclick=()=>{$('x0').value='0.506127';$('x1').value='0.506';$('coffee').value=30;$('rho').value=28;$('tol').value=2;run()};
+['x0','x1','coffee','rho','tol'].forEach(id=>$(id).addEventListener('input',run));
+const ro=new ResizeObserver(drawAll);['cX','cE','cA'].forEach(id=>ro.observe($(id)));
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);
+new MutationObserver(drawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+run();
+}
+</script>
+</body>
+</html>

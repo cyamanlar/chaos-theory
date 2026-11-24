@@ -1,6 +1,6 @@
 # Chaos Theory, the Butterfly Effect, Fractals and Noise — An Atmospheric Science and Machine Learning Perspective
 
-**Cansu Yamanlar** · İTÜ MTO 311E Data Analysis · November 2026
+**Cansu Yamanlar** · November 2026
 
 **▶ Interactive dashboard:** [Lorenz's desk, MIT, 1961](https://cyamanlar.github.io/chaos-theory/) — play Edward Lorenz, type in two nearby initial values and watch the two weathers split (`index.html`).
 

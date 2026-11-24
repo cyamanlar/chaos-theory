@@ -1,5 +1,5 @@
 """
-MTO 311E Data Analysis - Chaos, Sensitive Dependence and Noise Reduction
+Chaos, Sensitive Dependence on Initial Conditions and Noise Reduction
 Author: Cansu Yamanlar
 
 1) Logistic map: sensitive dependence on initial conditions + Lyapunov exponent
